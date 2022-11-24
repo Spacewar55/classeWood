@@ -5,9 +5,11 @@
 #include <String>
 #include "myFunctions.cpp" //Fonctions utilitaires
 #include <HTTPClient.h>
-#include "MyOled.h"
 
 using namespace std;
+
+#include "MyOled.h"
+MyOled *myOled = NULL;
 
 #include <WiFiManager.h>
 WiFiManager wm;
@@ -15,7 +17,9 @@ WiFiManager wm;
 
 #include "MyServer.h" 
 MyServer *myServer = NULL;
-MyOled *myOled = NULL;
+
+#include "MyOledViewWifiAp.h"
+MyOledViewWifiAp *myOledViewWifiAp = NULL;
 
 //Variable pour la connection Wifi
 const char * SSID = "SAC_";
@@ -28,14 +32,16 @@ int temps = 0;
 #define GPIO_PIN_LED_LOCK_ROUGE 12 // Led Rouge GPIO12
 #define GPIO_PIN_LED_OK_VERT 14 // Led Verte GPIO14
 #define GPIO_PIN_LED_HEAT_JAUNE 27 // Led Jaune GPIO16
+
+#define nomSystem "SAC System"
+
  
 // Définition des boutons
 #include "MyButton.h"
 MyButton *myButtonAction = NULL;
 MyButton *myButtonReset = NULL;
  
- #include "TemperatureStub.h"
-// Définition senseur température
+#include "TemperatureStub.h"
 #define DHTPIN  15  // Pin utilisée par le DHT22
 #define DHTTYPE DHT22  //Le type de senseur utilisé
 TemperatureStub *temperatureStub = NULL;
@@ -113,6 +119,12 @@ void setup() {
 
   myOled = new MyOled(&Wire, -1, 64, 128);
   myOled->init();
+
+  myOledViewWifiAp = new MyOledViewWifiAp();
+  myOledViewWifiAp->setNomDuSysteme(nomSystem);
+  myOledViewWifiAp->setSsIDDuSysteme(ssIDRandom.c_str());
+  myOledViewWifiAp->setPassDuSysteme(PASSRandom.c_str());
+  myOled->displayView(myOledViewWifiAp);
 }
  
 void loop() {
