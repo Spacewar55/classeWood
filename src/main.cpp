@@ -21,6 +21,9 @@ MyServer *myServer = NULL;
 #include "MyOledViewWifiAp.h"
 MyOledViewWifiAp *myOledViewWifiAp = NULL;
 
+#include "MyOledViewInitialisation.h"
+MyOledViewInitialisation *myOledViewInitialisation = NULL;
+
 //Variable pour la connection Wifi
 const char * SSID = "SAC_";
 const char * PASSWORD = "sac_";
@@ -34,7 +37,7 @@ int temps = 0;
 #define GPIO_PIN_LED_HEAT_JAUNE 27 // Led Jaune GPIO16
 
 #define nomSystem "SAC System"
-
+string idDuSysteme = "98262";
  
 // Définition des boutons
 #include "MyButton.h"
@@ -112,7 +115,13 @@ void setup() {
   myButtonReset = new MyButton();
   myButtonReset->init(T9);
   int sensibilisationButtonReset = myButtonReset->autoSensibilisation();
- 
+
+  char strBoutonAction[128];
+  sprintf(strBoutonAction, "%d", sensibilisationButtonAction);
+
+  char strBoutonReset[128];
+  sprintf(strBoutonReset, "%d", sensibilisationButtonReset);
+
   //Initiation du senseur de température
   temperatureStub = new TemperatureStub;
   temperatureStub->init(DHTPIN, DHTTYPE);
@@ -120,11 +129,33 @@ void setup() {
   myOled = new MyOled(&Wire, -1, 64, 128);
   myOled->init();
 
+  myOledViewInitialisation = new MyOledViewInitialisation();
+  myOledViewInitialisation->setIdDuSysteme(idDuSysteme.c_str());
+  myOledViewInitialisation->setNomDuSysteme(nomSystem);
+  myOledViewInitialisation->setSensibiliteBoutonAction(strBoutonAction);
+  myOledViewInitialisation->setSensibiliteBoutonReset(strBoutonReset);
+  myOled->displayView(myOledViewInitialisation);
+  delay(2000);
+  myOled->clearDisplay();
+
   myOledViewWifiAp = new MyOledViewWifiAp();
   myOledViewWifiAp->setNomDuSysteme(nomSystem);
   myOledViewWifiAp->setSsIDDuSysteme(ssIDRandom.c_str());
   myOledViewWifiAp->setPassDuSysteme(PASSRandom.c_str());
   myOled->displayView(myOledViewWifiAp);
+
+  int i = 0;
+  for (i = 0; i < 2; i++){
+    digitalWrite(GPIO_PIN_LED_LOCK_ROUGE, HIGH);
+    digitalWrite(GPIO_PIN_LED_OK_VERT, HIGH);
+    digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, HIGH);
+    delay(500);
+    digitalWrite(GPIO_PIN_LED_LOCK_ROUGE, LOW);
+    digitalWrite(GPIO_PIN_LED_OK_VERT, LOW);
+    digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
+    delay(500);
+  }
+  
 }
  
 void loop() {
