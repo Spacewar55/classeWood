@@ -24,6 +24,15 @@ MyOledViewWifiAp *myOledViewWifiAp = NULL;
 #include "MyOledViewInitialisation.h"
 MyOledViewInitialisation *myOledViewInitialisation = NULL;
 
+#include "MyOledViewWorkingOFF.h"
+MyOledViewWorkingOFF *myOledViewWorkingOFF = NULL;
+
+#include "MyOledViewWorkingCOLD.h"
+MyOledViewWorkingCOLD *myOledViewWorkingCOLD = NULL;
+
+#include "MyOledViewWorkingHEAT.h"
+MyOledViewWorkingHEAT *myOledViewWorkingHEAT = NULL;
+
 //Variable pour la connection Wifi
 const char * SSID = "SAC_";
 const char * PASSWORD = "sac_";
@@ -49,6 +58,11 @@ MyButton *myButtonReset = NULL;
 #define DHTTYPE DHT22  //Le type de senseur utilisé
 TemperatureStub *temperatureStub = NULL;
 
+float temperatureDuFour;
+char strTemperatureDuFour[128];
+
+string etatFour = "OFF";
+int currentTemperatureDisplayed = 0;
 // std::string CallBackMessageListener(string message) {
 //   while(replaceAll(message, std::string("  "), std::string(" ")));
 //   //Décortiquer le message
@@ -116,15 +130,15 @@ void setup() {
   myButtonReset->init(T9);
   int sensibilisationButtonReset = myButtonReset->autoSensibilisation();
 
+  //Initiation du senseur de température
+  temperatureStub = new TemperatureStub;
+  temperatureStub->init(DHTPIN, DHTTYPE);
+
   char strBoutonAction[128];
   sprintf(strBoutonAction, "%d", sensibilisationButtonAction);
 
   char strBoutonReset[128];
   sprintf(strBoutonReset, "%d", sensibilisationButtonReset);
-
-  //Initiation du senseur de température
-  temperatureStub = new TemperatureStub;
-  temperatureStub->init(DHTPIN, DHTTYPE);
 
   myOled = new MyOled(&Wire, -1, 64, 128);
   myOled->init();
@@ -132,10 +146,16 @@ void setup() {
   myOledViewInitialisation = new MyOledViewInitialisation();
   myOledViewInitialisation->setIdDuSysteme(idDuSysteme.c_str());
   myOledViewInitialisation->setNomDuSysteme(nomSystem);
+  myOledViewInitialisation->setSensibiliteBoutonAction("????");
+  myOledViewInitialisation->setSensibiliteBoutonReset("????");
+  myOled->displayView(myOledViewInitialisation);
+  delay(2000);
+
   myOledViewInitialisation->setSensibiliteBoutonAction(strBoutonAction);
   myOledViewInitialisation->setSensibiliteBoutonReset(strBoutonReset);
   myOled->displayView(myOledViewInitialisation);
   delay(2000);
+
   myOled->clearDisplay();
 
   myOledViewWifiAp = new MyOledViewWifiAp();
@@ -143,6 +163,8 @@ void setup() {
   myOledViewWifiAp->setSsIDDuSysteme(ssIDRandom.c_str());
   myOledViewWifiAp->setPassDuSysteme(PASSRandom.c_str());
   myOled->displayView(myOledViewWifiAp);
+  delay(2000);
+  myOled->clearDisplay();
 
   int i = 0;
   for (i = 0; i < 2; i++){
@@ -155,21 +177,69 @@ void setup() {
     digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
     delay(500);
   }
-  
+   
 }
- 
+
+void displayGoodScreen(){
+  delay(10);
+
+  sprintf(strTemperatureDuFour, "%g", temperatureDuFour);
+
+  if(isEqualString(etatFour.c_str(), string("HEAT"))) myOled->updateCurrentView(myOledViewWorkingHEAT);
+
+  if(isEqualString(etatFour.c_str(), string("OFF"))) {
+    digitalWrite(GPIO_PIN_LED_LOCK_ROUGE, LOW);
+    digitalWrite(GPIO_PIN_LED_OK_VERT, HIGH);
+    digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
+    myOledViewWorkingOFF = new MyOledViewWorkingOFF();
+    myOledViewWorkingOFF->setParams("nomDuSysteme", nomSystem);
+    myOledViewWorkingOFF->setParams("idDuSysteme", idDuSysteme);
+    myOledViewWorkingOFF->setParams("temperature", strTemperatureDuFour);
+    myOledViewWorkingOFF->setParams("ipDuSysteme",WiFi.localIP().toString().c_str());
+    myOled->displayView(myOledViewWorkingOFF);
+    currentTemperatureDisplayed = temperatureDuFour;
+  }
+
+  if(isEqualString(etatFour.c_str(), string("COLD"))) {
+    digitalWrite(GPIO_PIN_LED_LOCK_ROUGE, LOW);
+    digitalWrite(GPIO_PIN_LED_OK_VERT, LOW);
+    digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, HIGH);
+    myOledViewWorkingCOLD = new MyOledViewWorkingCOLD();
+    myOledViewWorkingCOLD->setParams("nomDuSysteme", nomSystem);
+    myOledViewWorkingCOLD->setParams("idDuSysteme", idDuSysteme);
+    myOledViewWorkingCOLD->setParams("temperature", strTemperatureDuFour);
+    myOledViewWorkingCOLD->setParams("ipDuSysteme",WiFi.localIP().toString().c_str());
+    myOled->displayView(myOledViewWorkingCOLD);
+    currentTemperatureDisplayed = temperatureDuFour;
+
+  }
+
+  if(isEqualString(etatFour.c_str(), string("HEAT"))) {
+    digitalWrite(GPIO_PIN_LED_LOCK_ROUGE, HIGH);
+    digitalWrite(GPIO_PIN_LED_OK_VERT, LOW);
+    digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
+    myOledViewWorkingHEAT = new MyOledViewWorkingHEAT();
+    myOledViewWorkingHEAT->setParams("nomDuSysteme", nomSystem);
+    myOledViewWorkingHEAT->setParams("idDuSysteme", idDuSysteme);
+    myOledViewWorkingHEAT->setParams("temperature", strTemperatureDuFour);
+    myOledViewWorkingHEAT->setParams("ipDuSysteme",WiFi.localIP().toString().c_str());
+    myOled->displayView(myOledViewWorkingHEAT);
+    currentTemperatureDisplayed = temperatureDuFour;
+  }
+}
+
 void loop() {
-  float t = temperatureStub->getTemperature();
   int i;
 
+  temperatureDuFour = temperatureStub->getTemperature();
   Serial.print("Température : ");
-  Serial.println(t);
+  Serial.println(temperatureDuFour);
   delay(2000);
- 
+
   //Gestion du bouton Action
   // int buttonAction = myButtonAction->checkMyButton();
   // if(buttonAction > 2)  {
-  //   if(t > 25)
+  //   if(temperatureDuFour > 25)
   //   {
   //     Serial.println("Vous avez appuyé sur le bouton d'action ");
   //     for (i = 0; i < 5; i++)
@@ -186,5 +256,16 @@ void loop() {
   //     digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
   //   }
   // }
-}
+  
+  if(temperatureDuFour < 25){
+    etatFour = "COLD";
+  } 
+  if(temperatureDuFour >= 25){
+    etatFour = "HEAT";
+  }
+  else{
+    etatFour = "OFF";
+  }
 
+  displayGoodScreen();
+}
