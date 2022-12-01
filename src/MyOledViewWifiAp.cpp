@@ -34,12 +34,12 @@ void MyOledViewWifiAp::display(Adafruit_SSD1306 *adafruit){
     adafruit->print("AP configuration");
 
     adafruit->setTextSize(1);
-    adafruit->setCursor(0, 30);
+    adafruit->setCursor(15, 30);
     adafruit->print("SSID: ");
     adafruit->print(ssIDDuSysteme.c_str());
     
     adafruit->setTextSize(1);
-    adafruit->setCursor(0, 40);
+    adafruit->setCursor(15, 40);
     adafruit->print("PASS: ");
     adafruit->print(passDuSysteme.c_str());
 
