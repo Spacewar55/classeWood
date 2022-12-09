@@ -1,177 +1,179 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
+ 
 <head>
-  <meta charset="utf-8">
-  <title>SAC</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js"></script>
+<script type = "text/javascript" src="script.js">
+    getBois();
+    getCaracteristiqueBois();
+</script>
 </head>
+
 <body>
-    <div class="contenant">
-        <div class="column">
-            <img class="fit-picture" src="img/sac.png"></img>
-            <h2>Type de bois</h2>
-            <select name="typeBois" id="typeBois" class="choix">
-                <option value="erable">Erable</option>
-                <option value="bouleau">Bouleau</option>
-                <option value="sapin">Sapin</option>
-                <option value="chene">Chêne</option>
-            </select>
-            <div class="box">
-                <h2>Caractéristiques</h2>
-                <span>
-                    <p>Bois :</p>
-                    <input type="text" readonly>
-                </span> 
-                <span>
-                    <p>Type :</p>
-                    <input type="text" readonly>
-                </span>
-                <span>
-                    <p>Origine :</p>
-                    <input type="text" readonly>
-                </span>
-                <span>
-                    <p>Temps de séchage : </p>
-                    <input type="text" readonly>
-                </span>
-                <span>
-                    <p>Température min : </p>
-                    <input type="text" readonly>
-                </span>
+    <img src="sac.png" width="200" height="100">
+
+    <h1> Type de Bois</h1>
+
+    <SELECT id="typeBois" size="1" class="choix"></SELECT>
+
+    <h1>Caracteristiques</h1>
+
+    <table style="border:solid;">
+        <tr>
+            <td>Bois</td>
+            <td>:</td>
+            <td id="nomDuBois"> </td>
+        </tr>
+        <tr>
+            <td>Type</td>
+            <td>:</td>
+            <td id="typeDuBois"></td>
+        </tr>
+        <tr>
+            <td>Origine </td>
+            <td>:</td>
+            <td id="origineDuBois"></td>
+        </tr>
+        <tr>
+            <td>Temps de sechage</td>
+            <td>:</td>
+            <td id="tempsDuBois"> </td>
+        </tr>
+        <tr>
+            <td>Temperature min</td>
+            <td>:</td>
+            <td id="temperatureDuBois"></td>
+        </tr>
+    </table>
+    <h3> Controle du four de sechage </h3>
+
+    <div class="block">
+        <div class="center">
+            <div>
+                <p style="margin-top: 3em"><strong>Temperature du four : </strong></p>
+                <br>
+                <p class='temperature' id="temperature" name="temperature"></p>
+                <br>
             </div>
+            <button id="btnDemarrage" onclick="runFour()" class="box">Demarrage du four</button>
         </div>
-        <div class="column">
-            <div class="box">
-                <h2 align='left'>Contrôle du four de séchage</h2>
-                <div>
-                    <p><strong>Température du four : </strong></p>
-                    <input type="text" class='temperatureFour' id="temperature" name="temperature" readonly>
-                </div>
-                <button class="demarrer" type="button">Démarrage du four</button>
-                <div class="info">
-                    <span>
-                        <input type="text" class='retourDonnees' id="bois" name="bois" readonly>
-                    </span>
-                    <span>
-                        <input type="int" class='retourDonnees' id="tempRestant" name="tempRestant" readonly>
-                    </span> 
-                    <span>
-                        <input type="int" class='retourDonnees' id="tempsSechage" name="tempsSechage" readonly>
-                    </span> 
-                    <span>
-                        <input type="int" class='retourDonnees' id="tempMin" name="tempMin" readonly>
-                    </span>
-                </div>
-            </div>
+        <div class="ligne">
+            <p class="bleu"><span id="nomDuBois2"></span></p>
+            <p class="bleu"><span id="timer"></span>/<span id="dryingBois2"></span> Temps de sechage(sec)</p>
+            <p class="bleu">(min: <span id="tempMin2"></span> Celsuis)</p>
+
+            <p class="cercleRouge"></p>
+            <p class="cercleOrange"></p>
+            <p class="cercleVert"></p>
+
         </div>
     </div>
 </body>
+
+
 </html>
+
 <style>
-    *{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+    body {
+        background-color: white;
+    }
 
-body{
-    height: 100vh;
-    padding: 1em;
-}
+    h1 {
+        color: black;
+        text-align:left;
+    }
 
-.contenant{
-    display: flex;
-    gap: 1em;
-    height: 85%;
-}
+    h2 {
+        width: 400px;
+        border: 3px solid black;
+        padding: 10px;
+        margin: 5px;
+        font-family: 'Times New Roman', Times;
+        font-weight: normal ;
+    }
 
-.box{
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border: 2px solid;
-    height: 100%;
-}
+    .block{
+        width:500px;
+        height:375px;
+        position: fixed;
+        top: 6%;
+        left: 25%;
+        border: 5px solid black;
+        display : flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .center {
+        font-family: 'Times New Roman', Times;
+        font-weight: bold ;
+        text-align: center;
+        font-size: 24px;
+    }
 
-.box span{
-    display: flex;
-    justify-content: space-between;
-    height: 2em;
-}
+    h3{
+        position: fixed;
+        top: -1%;
+        left: 25%;
+        font-size: 24px;   
+    }
 
-.column{
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    gap: 1em;
-}
+    .celcuis{
+        color:blue;
+        text-align: center;
+    }
 
-.column select{
-    background-color: #F7C59F;
-}
+    .choix{
+        background-color:#90EE90;
+        width: 300px;
+        height: 40px;
+        font-size: 24px;
+        border : solid;
+    }
 
-button{
-    background-color: aqua;
-    font-size: .875rem;
-    border-radius: 30px;
-    margin-top: 20%;
-    margin-bottom: 30%;
-    height: 50px;
-}
+    .box{
+        background-color: #ADD8E6;
+        font-size: 24px;
+        border-radius: 25px;
+        margin-left: 125px;
+        margin-right: 125px;
+    }
 
-.info{
-    display: flex;
-}
+    .right{
+        text-align: right;
+    }
 
-.column:nth-child(2){
-    height: 100%;
-}
+    .cercleRouge {
+        height: 10px;
+        width: 10px;
+        background-color : red;
+        border-radius: 50%;
+        display: inline-block;
+        text-align: right;
+    }
 
-.demarrer{
-    width: 50%;
-    margin: 0 auto;
-    border-radius: 20%;
-}
-/* .retourDonnees, */
-.temperatureFour{
-    width: 30%;
-    border: #fff;
-    color: blue;
-}
+    .cercleOrange {
+        height: 10px;
+        width: 10px;
+        background-color : orange;
+        border-radius: 50%;
+        display: inline-block;
+        text-align: right;
+    }
 
-.choix::before, .choix::after {
-    content: "";
-    position: absolute;
-    pointer-events: none;
-}
+    .cercleVert {
+        height: 10px;
+        width: 10px;
+        background-color : green;
+        border-radius: 50%;
+        display: inline-block;
+        text-align: right;
+    }
 
+    .ligne {
+        display: flex;
+        justify-content: space-between;
+    }
 
-
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    grid-auto-rows: minmax(100px, auto);
-}
-.un{
-    grid-column-start: 1;
-    grid-column-end: 2;
-    grid-row-start: row1-start;
-    grid-row-end: 2;
-}
-.deux{
-    grid-column-start: 1;
-    grid-column-end: 2;
-    grid-row-start: 2;
-    grid-row-end: 3;
-    border: 4px;
-}
-.trois{
-    grid-column-start: 2;
-    grid-column-end: 3;
-    grid-row-start: row1-start;
-    grid-row-end: 3;
-}
-
+    .bleu{
+        color : blue;
+    }
 </style>

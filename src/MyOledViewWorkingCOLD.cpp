@@ -18,8 +18,6 @@ void MyOledViewWorkingCOLD::display(Adafruit_SSD1306 *adafruit){
     adafruit->setCursor(70,20);
     adafruit->print("Waiting");
 
-    displayGifFire(adafruit, 80, 30);
-
     adafruit->setTextSize(2);
     adafruit->setCursor(10, 30);
     adafruit->print(getTag("temperature").c_str());
@@ -28,5 +26,4 @@ void MyOledViewWorkingCOLD::display(Adafruit_SSD1306 *adafruit){
 }
 
 void MyOledViewWorkingCOLD::update(Adafruit_SSD1306 *adafruit){
-    Serial.println("Update my view MyOledViewWorkingCOLD");
 }

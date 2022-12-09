@@ -58,35 +58,33 @@ MyButton *myButtonReset = NULL;
 #define DHTTYPE DHT22  //Le type de senseur utilisé
 TemperatureStub *temperatureStub = NULL;
 
-float temperatureDuFour;
+//Récupérer la température
+float temperatureDuFour = 20;
 char strTemperatureDuFour[128];
+
+//Récupérer la liste des bois
+char strListeBois[128];
 
 string etatFour = "OFF";
 int currentTemperatureDisplayed = 0;
-// std::string CallBackMessageListener(string message) {
-//   while(replaceAll(message, std::string("  "), std::string(" ")));
-//   //Décortiquer le message
-//   string actionToDo = getValue(message, ' ', 0);
-//   string arg1 = getValue(message, ' ', 1);
-//   string arg2 = getValue(message, ' ', 2);
-//   string arg3 = getValue(message, ' ', 3);
-//   string arg4 = getValue(message, ' ', 4);
-//   string arg5 = getValue(message, ' ', 5);
-//   string arg6 = getValue(message, ' ', 6);
-//   string arg7 = getValue(message, ' ', 7);
-//   string arg8 = getValue(message, ' ', 8);
-//   string arg9 = getValue(message, ' ', 9);
-//   string arg10 = getValue(message, ' ', 10);
 
-//   if (string(actionToDo.c_str()).compare(string("button")) == 0) {
-//     if(string(arg1.c_str()).compare(string("getTemp")) == 0) {
-//       temps = atoi(arg2.c_str());
-//       return(String("Ok").c_str());
-//     }
-//   }
-//   std::string result = "";
-//   return result;
-// }
+int temperatureActuelleDuFour = 24;
+
+std::string CallBackMessageListener(string message) {
+  while(replaceAll(message, std::string("  "), std::string(" ")));
+  //Décortiquer le message
+  string actionToDo = getValue(message, ' ', 0);
+  string actionToDo1 = getValue(message, ' ', 1);
+
+  if (string(actionToDo.c_str()).compare(string("askTempFour")) == 0) {
+    sprintf(strTemperatureDuFour, "%4.1f", temperatureDuFour);
+    Serial.println(strTemperatureDuFour);
+    return(strTemperatureDuFour);
+  }
+
+  std::string result = "";
+  return result;
+}
 
 void setup() {
   Serial.begin(9600);
@@ -114,7 +112,8 @@ void setup() {
 
   // ----------- Routes du serveur ----------------
   myServer = new MyServer(80);
-  myServer -> initAllRoutes();
+  myServer->initAllRoutes();
+  myServer->initCallback(&CallBackMessageListener);
 
   // Initialisation des LEDs
   pinMode(GPIO_PIN_LED_LOCK_ROUGE, OUTPUT);
@@ -146,16 +145,10 @@ void setup() {
   myOledViewInitialisation = new MyOledViewInitialisation();
   myOledViewInitialisation->setIdDuSysteme(idDuSysteme.c_str());
   myOledViewInitialisation->setNomDuSysteme(nomSystem);
-  myOledViewInitialisation->setSensibiliteBoutonAction("????");
-  myOledViewInitialisation->setSensibiliteBoutonReset("????");
-  myOled->displayView(myOledViewInitialisation);
-  delay(2000);
-
   myOledViewInitialisation->setSensibiliteBoutonAction(strBoutonAction);
   myOledViewInitialisation->setSensibiliteBoutonReset(strBoutonReset);
   myOled->displayView(myOledViewInitialisation);
   delay(2000);
-
   myOled->clearDisplay();
 
   myOledViewWifiAp = new MyOledViewWifiAp();
@@ -177,7 +170,6 @@ void setup() {
     digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
     delay(500);
   }
-   
 }
 
 void displayGoodScreen(){
@@ -236,31 +228,28 @@ void loop() {
   Serial.println(temperatureDuFour);
   delay(2000);
 
-  //Gestion du bouton Action
-  // int buttonAction = myButtonAction->checkMyButton();
-  // if(buttonAction > 2)  {
-  //   if(temperatureDuFour > 25)
+  //Gestion du bouton Démarrer
+  // int buttonDemarrer = buttonDemarrer->checkMyButton();
+  // if(buttonDemarrer > 2)  {
+  //   if(temperatureDuFour < temperatureActuelleDuFour)
   //   {
-  //     Serial.println("Vous avez appuyé sur le bouton d'action ");
-  //     for (i = 0; i < 5; i++)
-  //     {
-  //       digitalWrite(GPIO_PIN_LED_LOCK_ROUGE, HIGH);
-  //       delay(500);
-  //       digitalWrite(GPIO_PIN_LED_LOCK_ROUGE, LOW);
-  //       delay(500);
-  //     }
+  //     Serial.println("Le four doit chauffer");
+  //     etatFour = "COLD";
+  //   }
+  //   if(temperatureDuFour >= temperatureActuelleDuFour)
+  //   {
+  //     Serial.println("Le four est en train de sécher le bois");
+  //     etatFour = "HEAT";
   //   }
   //   else{
-  //     digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, HIGH);
-  //     delay(3000);
-  //     digitalWrite(GPIO_PIN_LED_HEAT_JAUNE, LOW);
+  //     etatFour = "OFF";
   //   }
   // }
   
-  if(temperatureDuFour < 25){
+  if(temperatureDuFour < temperatureActuelleDuFour){
     etatFour = "COLD";
   } 
-  if(temperatureDuFour >= 25){
+  if(temperatureDuFour >= temperatureActuelleDuFour){
     etatFour = "HEAT";
   }
   else{
